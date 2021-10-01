@@ -1,4 +1,6 @@
 import coffeMacine.Machine;
+import lombok.*;
+
 import java.util.Scanner;
 
 public class Application {
@@ -12,10 +14,12 @@ public class Application {
         System.out.print("Press Enter PowerOn");
         String inp = in.nextLine();
         if(inp == ""){
-            System.out.println("PowerOn");
+            String str;
             coffeeMachine.power();
-            do{
-                System.out.println("Press Enter to PowerOff\n" +
+            while(true){
+                if(!coffeeMachine.checkState()) str = "PowerOn";
+                else str = "PowerOff";
+                System.out.println("Press Enter to " + str +"\n" +
                                     "Press \"coffee\" to choose coffee\n" +
                                     "Press \"r\" to open recipe menu\n"+
                                     "Press \"p\" to add products\n" +
@@ -32,13 +36,15 @@ public class Application {
                     case "p": addProduct();break;
                     case "c":coffeeMachine.checkCleanness();break;
                     case "clean":coffeeMachine.clean();break;
-                    case "s": coffeeMachine.log();
-                    case "": if(coffeeMachine.checkState()) System.out.println("PowerOn");
-                            else System.out.println("PowerOff");
+                    case "s": showLog();
+                                break;
+                    case "": coffeeMachine.power();
                             break;
-                    case "x": in.close(); return;
+                    case "x":
+                        in.close();
+                        return;
                 }
-            }while(true);
+            }
         }
     }
 
@@ -168,5 +174,18 @@ public class Application {
         return num;
     }
 
+    private static void showLog(){
 
+        System.out.println("Press \"c\" to show coffee log\n" +
+                            "Press \"p\" to show products log");
+        String str = in.nextLine();
+        switch (str){
+            case "c" :
+                coffeeMachine.logCoffee();
+                break;
+            case "p" :
+                coffeeMachine.logProduct();
+                break;
+        }
+    }
 }

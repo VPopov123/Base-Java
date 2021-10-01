@@ -1,7 +1,13 @@
 package coffeMacine;
 
 import coffeMacine.DataClasses.Recipe;
+import coffeMacine.clock.ClockRunnable;
+import coffeMacine.clock.ClockTread;
+import lombok.Cleanup;
+import lombok.NonNull;
+
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Machine {
     private boolean state;
@@ -16,7 +22,11 @@ public class Machine {
 
     private ArrayList<Recipe> recipes;
 
-    private Logger logger;
+    private ClockTread clockTread;
+    private Thread clockRunnable;
+
+    private LoggerFather loggerCoffee;
+    private LoggerFather loggerProducts;
 
     public int getCurrentWaterValue() {
         return currentWaterValue;
@@ -31,15 +41,16 @@ public class Machine {
 
     public Machine(){
         state = false;
-        logger = new Logger();
+        loggerCoffee = new LoggerCoffee();
+        loggerProducts = new LoggerProducts();
 
         recipes = new ArrayList<>();
         Recipe cappuccino = new Recipe(4, 3, 3, "cappuccino");
         Recipe espresso = new Recipe(0, 6, 4, "espresso");
 
-        currentMilkValue = 50;
-        currentCoffeeValue = 50;
-        currentWaterValue = 50;
+        currentMilkValue = 100;
+        currentCoffeeValue = 100;
+        currentWaterValue = 100;
 
         recipes.add(cappuccino);
         recipes.add(espresso);
@@ -51,6 +62,7 @@ public class Machine {
             if (currentWaterValue + value > MAX_WATER_VALUE) return false;
             else {
                 currentWaterValue += value;
+                loggerProducts.add("water");
                 return true;
             }
         }
@@ -63,6 +75,7 @@ public class Machine {
 
             else {
                 currentMilkValue += value;
+                loggerProducts.add("milk");
                 return true;
             }
         }else return false;
@@ -73,14 +86,25 @@ public class Machine {
             if (currentCoffeeValue + value > MAX_COFFEE_VALUE) return false;
             else {
                 currentCoffeeValue += value;
+                loggerProducts.add("coffee");
                 return true;
             }
         }else return false;
     }
 
     public boolean power(){
-        if(state == false) state = true;
-        else state = false;
+        if(state == false){
+            state = true;
+//            clockTread = new ClockTread();
+//            clockTread.start();
+            clockRunnable = new Thread(new ClockRunnable(), "clock");
+            clockRunnable.start();
+        }
+        else {
+            state = false;
+//            clockTread.interrupt();
+            clockRunnable.interrupt();
+        }
         return state;
     }
 
@@ -109,9 +133,11 @@ public class Machine {
 
     public void addRecipe(int milk, int coffee, int water, String name){
         if(state) {
-            if (name == null) name = new String("profile " + (recipes.size() - 1));
-            Recipe recipe = new Recipe(milk, coffee, water, name);
-            recipes.add(recipe);
+            if (name == null){
+                name = new String("profile " + (recipes.size() - 1));
+            }
+
+            recipes.add(new Recipe(milk, coffee, water, name));
         }
     }
 
@@ -127,14 +153,14 @@ public class Machine {
             else
                 if (currentMilkValue < recipes.get(id).getMilk() ||
                         currentCoffeeValue < recipes.get(id).getCoffee() ||
-                        currentWaterValue < recipes.get(id).getCoffee())
+                        currentWaterValue < recipes.get(id).getWater())
                     System.out.println("Missing components");
                 else {
                     currentMilkValue -= recipes.get(id).getMilk();
                     currentCoffeeValue -= recipes.get(id).getCoffee();
-                    currentWaterValue -= recipes.get(id).getCoffee();
+                    currentWaterValue -= recipes.get(id).getWater();
                     cleanness++;
-                    logger.add(recipes.get(id).getName());
+                    loggerCoffee.add(recipes.get(id).getName());
                     System.out.println("Your coffee please!");
                 }
         }
@@ -153,9 +179,39 @@ public class Machine {
         }
     }
 
-    public void log(){
+    public void logCoffee(){
         if(state) {
-            logger.showLog();
+            Scanner inp = new Scanner(System.in);
+            System.out.println("Press \"t\" to sort by time\n" +
+                                "Press \"n\" to sort by name");
+            String str = inp.nextLine();
+
+            switch (str){
+                case "t":
+                    loggerCoffee.sortTime();
+                    break;
+                case "n" :
+                    loggerCoffee.sortName();
+                    break;
+            }
+        }
+    }
+
+    public void logProduct(){
+        if(state) {
+            Scanner inp = new Scanner(System.in);
+            System.out.println("Press \"t\" to sort by time\n" +
+                                "Press \"n\" to sort by name");
+            String str = inp.nextLine();
+
+            switch (str){
+                case "t":
+                    loggerProducts.sortTime();
+                    break;
+                case "n" :
+                    loggerProducts.sortName();
+                    break;
+            }
         }
     }
 }

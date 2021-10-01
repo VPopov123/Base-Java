@@ -1,13 +1,14 @@
 package coffeMacine.DataClasses;
 
-import java.security.PublicKey;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
 import java.sql.Time;
 
+@RequiredArgsConstructor
+@Getter
 public class Log {
-    public Time time;
-    public String profileName;
-    public Log(String profileName, Time time){
-        this.profileName = profileName;
-        this.time = time;
-    }
+    @NonNull private Time time;
+    @NonNull private String profileName;
 }
