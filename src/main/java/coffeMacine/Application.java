@@ -1,3 +1,5 @@
+package coffeMacine;
+
 import coffeMacine.Machine;
 import lombok.*;
 
