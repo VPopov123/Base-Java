@@ -97,13 +97,13 @@ public class Machine {
             state = true;
 //            clockTread = new ClockTread();
 //            clockTread.start();
-            clockRunnable = new Thread(new ClockRunnable(), "clock");
-            clockRunnable.start();
+//            clockRunnable = new Thread(new ClockRunnable(), "clock");
+//            clockRunnable.start();
         }
         else {
             state = false;
 //            clockTread.interrupt();
-            clockRunnable.interrupt();
+//            clockRunnable.interrupt();
         }
         return state;
     }
